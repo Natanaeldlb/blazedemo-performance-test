@@ -1,0 +1,36 @@
+name: JMeter Performance Test
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  performance-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+
+    - name: Install JMeter
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y jmeter
+
+    - name: Run JMeter Test
+      run: |
+        mkdir -p reports/html_report
+        jmeter -n -t scripts/blazedemo_test.jmx -l reports/results.jtl -e -o reports/html_report
+
+    - name: Upload JMeter Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: jmeter-report
+        path: reports/html_report
