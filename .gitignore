@@ -1,9 +1,0 @@
-# JMeter
-*.jtl
-reports/html_report/
-
-# Logs
-*.log
-
-# IDE
-.vscode/

@@ -1,0 +1,42 @@
+name: Performance Test - BlazeDemo
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  jmeter-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Instalar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Baixar JMeter
+        run: |
+          wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz
+          tar -xzf apache-jmeter-5.6.3.tgz
+          mv apache-jmeter-5.6.3 jmeter
+
+      - name: Rodar teste de performance
+        run: |
+          ./jmeter/bin/jmeter -n \
+          -t scripts/TestPlan.jmx \
+          -l results.jtl
+
+      - name: Gerar relatório HTML
+        run: |
+          ./jmeter/bin/jmeter -g results.jtl -o html_report
+
+      - name: Upload do relatório
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-performance
+          path: html_report
