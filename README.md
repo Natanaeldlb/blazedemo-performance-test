@@ -1,145 +1,122 @@
-# 🧪 Teste de Performance – BlazeDemo
+# 🚀 Teste de Performance - BlazeDemo
 
 ## 📌 Objetivo
 
-Este projeto tem como objetivo validar o desempenho da aplicação **BlazeDemo** no cenário de compra de passagem aérea, garantindo que o sistema suporte carga e mantenha tempos de resposta aceitáveis.
+Este projeto tem como objetivo validar a performance do fluxo de **compra de passagem aérea** no site:
 
----
+```
+https://www.blazedemo.com
+```
 
-## 🌐 Sistema testado
-
-URL: https://www.blazedemo.com
+O teste foi desenvolvido utilizando **Apache JMeter**, simulando carga de usuários para avaliar o comportamento da aplicação sob estresse.
 
 ---
 
 ## 🎯 Cenário testado
 
-Fluxo completo de compra de passagem aérea:
+Fluxo completo de compra de passagem:
 
-1. Buscar voos (Manaus → Recife)
-2. Selecionar voo disponível
-3. Preencher dados do comprador
-4. Finalizar compra
+1. Buscar voos
+2. Selecionar voo
+3. Finalizar compra
+
+Critério de aceitação:
+
+* ✔ 250 requisições por segundo (RPS)
+* ✔ Percentil 90 (P90) menor que 2 segundos
 
 ---
 
-## ⚙️ Ferramentas utilizadas
+## ⚙️ Tecnologias utilizadas
 
 * Apache JMeter 5.6.3
-* Java (JDK 11+)
-* Execução via CLI (non-GUI mode)
+* Java (JDK 17+)
+* Git / GitHub
+* Bash (execução via terminal)
 
 ---
 
-## 🚀 Configuração do teste
-
-* Usuários virtuais: 100 threads
-* Ramp-up: 10 segundos
-* Duração: 60 segundos
-* Throughput configurado: ~250 requisições por segundo
-
 ---
 
-## ▶️ Como executar
+## ▶️ Como executar o teste
 
-1. Acesse a pasta do projeto:
+### 1. Pré-requisitos
 
-```bash
-cd blazedemo-performance-test
-```
+* Java instalado
+* JMeter configurado no PATH
 
-2. Execute o teste:
-
-```bash
-jmeter -n -t scripts/TestPlan.jmx -l reports/results.jtl
-```
-
-3. Gerar relatório HTML:
+### 2. Executar o teste
 
 ```bash
-jmeter -g reports/results.jtl -o reports/html_report
+bash run-test.sh
 ```
-
-4. Abrir relatório:
-
-```bash
-reports/html_report/index.html
-```
-
-## Execução automatizada
-
-O projeto possui integração com GitHub Actions para execução automática dos testes de performance a cada push na branch main.
-
-O relatório é gerado e disponibilizado como artifact da pipeline.
-
 
 ---
 
 ## 📊 Resultados obtidos
 
-* Throughput médio: **158.95 req/s**
-* Percentil 90 (P90): **~4.1 segundos**
-* Tempo médio de resposta: **~1.3 segundos**
-* Taxa de erro: **32.38%**
+### 🔢 Métricas gerais
+
+* Total de requisições: **10.461**
+* Throughput médio: **~159 req/s**
+* Tempo médio de resposta: **~1309 ms**
+* Percentil 90 (P90): **~3035 ms**
+* Taxa de erro: **~32%**
 
 ---
 
-## ❌ Critério de aceitação
+### 📍 Detalhamento por etapa
 
-* 250 requisições por segundo
-* Percentil 90 menor que 2 segundos
-
----
-
-## 📉 Análise dos resultados
-
-O sistema **não atendeu ao critério de aceitação**.
-
-Principais pontos:
-
-* O throughput ficou abaixo do esperado (158.95 req/s vs 250 req/s)
-* O tempo de resposta no percentil 90 ultrapassou o limite aceitável (4.1s)
-* Foi identificada uma alta taxa de erro (32%)
+| Etapa            | Erros | Observação               |
+| ---------------- | ----- | ------------------------ |
+| Buscar voos      | 0%    | Funcionando corretamente |
+| Selecionar voo   | 0%    | Funcionando corretamente |
+| Finalizar compra | 100%  | Falha total              |
 
 ---
 
-## ⚠️ Problema identificado
+## ❌ Validação do critério de aceitação
 
-A etapa **"Finalizar compra" apresentou 100% de falhas**, impactando diretamente o resultado geral do teste.
-
-Isso ocorre devido à ausência de correlação de dados dinâmicos no script (ex: seleção do voo retornado na etapa anterior).
-
----
-
-## 💡 Considerações técnicas
-
-* O BlazeDemo é um ambiente de demonstração e não está preparado para alta carga
-* A falta de correlação impacta a consistência do fluxo
-* O aumento da carga evidenciou degradação de performance da aplicação
+| Critério               | Resultado                   |
+| ---------------------- | --------------------------- |
+| 250 req/s              | ❌ Não atingido (~159 req/s) |
+| P90 < 2s               | ❌ Não atendido (~3s)        |
+| Taxa de erro aceitável | ❌ Não atendido (~32%)       |
 
 ---
 
-## 🏁 Conclusão
+## 🔍 Análise técnica
 
-O sistema não suporta a carga proposta mantendo os requisitos de desempenho estabelecidos.
+Durante a execução do teste, foi identificado que:
 
-Para cenários reais, seria necessário:
+* O sistema não conseguiu sustentar a carga de 250 requisições por segundo
+* O tempo de resposta ultrapassou o limite estabelecido
+* A etapa de **finalização da compra apresentou 100% de falha**
 
-* Implementar correlação de dados no script
-* Ajustar a infraestrutura da aplicação
-* Realizar testes com diferentes perfis de carga (carga e pico)
+Possíveis causas:
+
+* Falta de correlação completa de dados dinâmicos (ex: flightId)
+* Limitação da própria aplicação BlazeDemo (ambiente de teste)
+* Saturação sob carga elevada
 
 ---
 
-## 📁 Estrutura do projeto
+## ⚠️ Conclusão
 
-```
-blazedemo-performance-test/
-├── scripts/
-│   └── TestPlan.jmx
-├── reports/
-│   ├── results.jtl
-│   └── html_report/
-├── jmeter.log
-└── README.md
-```
+O sistema **não atendeu aos critérios de aceitação** definidos no desafio.
+
+Foi possível observar degradação de performance sob carga, além de falhas funcionais no fluxo completo de compra.
+
+---
+
+## 💡 Considerações finais
+
+* O teste demonstra corretamente a execução de um cenário real de ponta a ponta
+* Os resultados indicam limitações da aplicação sob carga
+* A análise evidencia pontos críticos de melhoria no sistema ou no fluxo testado
+
+---
+
+## 👨‍💻 Autor
+
+@NatanaelLima - Projeto desenvolvido para fins de avaliação técnica em testes de performance.
